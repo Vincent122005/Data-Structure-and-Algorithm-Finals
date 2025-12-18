@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CC104 Data Structures & Algorithms</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #ec4899;
+            --accent: #14b8a6;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --dark-lighter: #334155;
+            --text: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 20%, rgba(20, 184, 166, 0.1) 0%, transparent 50%);
+            animation: bgMove 20s ease-in-out infinite;
+        }
+
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-50px, -50px); }
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links button {
+            background: transparent;
+            border: none;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0.5rem;
+            position: relative;
+        }
+
+        .nav-links button::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-links button:hover {
+            color: var(--text);
+            background: var(--glass);
+        }
+
+        .nav-links button:hover::before {
+            width: 80%;
+        }
+
+        .nav-links button.active {
+            color: var(--text);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .nav-links button.active::before {
+            width: 0;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Section */
+        .section {
+            display: none;
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Page Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .card h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card h2::before {
+            content: '';
+            width: 4px;
+            height: 1.75rem;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+
+        /* Members Grid */
+        .members {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .member {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.125rem;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .member::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .member:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.5);
+        }
+
+        .member:hover::before {
+            left: 100%;
+        }
+
+        /* Algorithm Grid */
+        .algo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .algo-item {
+            background: var(--dark-light);
+            border: 1px solid var(--glass-border);
+            padding: 1.75rem;
+            border-radius: 1rem;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .algo-item:hover {
+            border-left-color: var(--secondary);
+            transform: translateX(8px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .algo-item h3 {
+            color: var(--primary-light);
+            margin-bottom: 1.25rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .algo-steps {
+            background: var(--dark);
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .algo-steps ol {
+            margin-left: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .algo-steps li {
+            padding: 0.375rem 0;
+            transition: color 0.2s;
+        }
+
+        .algo-steps li:hover {
+            color: var(--text);
+        }
+
+        /* Pseudocode */
+        .pseudo-code {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            background: var(--dark);
+            color: #a5f3fc;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            white-space: pre-wrap;
+            font-size: 0.875rem;
+            line-height: 1.8;
+            border: 1px solid var(--glass-border);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Code Block */
+        .code-block {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            background: var(--dark);
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            font-size: 0.875rem;
+            line-height: 1.8;
+            border: 1px solid var(--glass-border);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'Python';
+            position: absolute;
+            top: 0.75rem;
+            right: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            background: var(--glass);
+            border-radius: 0.375rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Interactive Section */
+        .interactive-section {
+            margin-top: 2.5rem;
+            padding: 2rem;
+            background: var(--dark-light);
+            border-radius: 1rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .interactive-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            min-width: 250px;
+            padding: 0.875rem 1.25rem;
+            background: var(--dark);
+            border: 2px solid var(--glass-border);
+            border-radius: 0.5rem;
+            color: var(--text);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.875rem 1.75rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.run {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn.run:hover {
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
+        }
+
+        /* Output */
+        .output {
+            background: var(--dark);
+            color: #a5f3fc;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+            min-height: 80px;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 0.9375rem;
+            line-height: 1.8;
+            border: 1px solid var(--glass-border);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+            white-space: pre-wrap;
+        }
+
+        /* Tree Visual */
+        .tree-visual {
+            text-align: center;
+            margin: 1.5rem 0;
+            padding: 2rem;
+            background: var(--dark);
+            border-radius: 0.75rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .tree-visual pre {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            color: var(--accent);
+            font-size: 1.125rem;
+            line-height: 1.6;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #a78bfa 0%, var(--primary-light) 25%, var(--secondary) 75%, #fbbf24 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.375rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                justify-content: center;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .algo-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .members {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-light);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <nav>
+        <div class="nav-container">
+            <div class="logo">CC104 Project</div>
+            <ul class="nav-links">
+                <li><button onclick="showSection('home')" class="active">Home</button></li>
+                <li><button onclick="showSection('algorithms')">Algorithms</button></li>
+                <li><button onclick="showSection('pseudocode')">Pseudocode</button></li>
+                <li><button onclick="showSection('array')">Array</button></li>
+                <li><button onclick="showSection('stack')">Stack</button></li>
+                <li><button onclick="showSection('queue')">Queue</button></li>
+                <li><button onclick="showSection('infix')">Infix→Postfix</button></li>
+                <li><button onclick="showSection('tree')">Tree</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- HOME SECTION -->
+        <div id="home" class="section active">
+            <div class="hero">
+                <h1>Data Structures<br>& Algorithms</h1>
+                <p>CC104 Final Requirements</p>
+            </div>
+
+            <div class="card">
+                <h2>Team Members</h2>
+                <div class="members">
+                    <div class="member">Livara RJ Vincent</div>
+                    <div class="member">Eduarte Romer</div>
+                    <div class="member">Sicam Johann</div>
+                    <div class="member">Sabado Ruzzi</div>
+                    <div class="member">Opilas Rommel</div>
+                    <div class="member">Molina Luigi</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>About This Project</h2>
+                <p style="color: var(--text-secondary); font-size: 1.125rem; line-height: 1.8;">
+                    This comprehensive educational platform demonstrates core data structures and algorithms through interactive visualizations and executable code. Each implementation includes detailed algorithms, pseudocode, and hands-on Python examples that run directly in your browser.
+                </p>
+            </div>
+        </div>
+
+        <!-- ALGORITHMS SECTION -->
+        <div id="algorithms" class="section">
+            <div class="page-header">
+                <h1>Algorithms</h1>
+                <p>Step-by-step procedures for solving computational problems</p>
+            </div>
+            <div class="card">
+                <div class="algo-grid">
+                    <div class="algo-item">
+                        <h3>1. Add Element to Array</h3>
+                        <div class="algo-steps">
+                            <ol>
+                                <li>Start</li>
+                                <li>Input value</li>
+                                <li>Insert value into array</li>
+                                <li>Display array</li>
+                                <li>End</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>2. Delete Element from Array</h3>
+                        <div class="algo-steps">
+                            <ol>
+                                <li>Start</li>
+                                <li>Input value</li>
+                                <li>Remove value from array</li>
+                                <li>Display array</li>
+                                <li>End</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>3. Stack Push</h3>
+                        <div class="algo-steps">
+                            <ol>
+                                <li>Start</li>
+                                <li>Input value</li>
+                                <li>Push value into stack</li>
+                                <li>Display stack</li>
+                                <li>End</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>4. Stack Pop</h3>
+                        <div class="algo-steps">
+                            <ol>
+                                <li>Start</li>
+                                <li>Remove top value</li>
+                                <li>Display stack</li>
+                                <li>End</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>5. Infix to Postfix Conversion</h3>
+                        <div class="algo-steps">
+                            <ol>
+                                <li>Start</li>
+                                <li>Read infix expression</li>
+                                <li>Convert to postfix</li>
+                                <li>Display result</li>
+                                <li>End</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>6. Queue Enqueue</h3>
+                        <div class="algo-steps">
+                            <ol>
+                                <li>Start</li>
+                                <li>Input value</li>
+                                <li>Add value to queue</li>
+                                <li>Display queue</li>
+                                <li>End</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>7. Queue Dequeue</h3>
+                        <div class="algo-steps">
+                            <ol>
+                                <li>Start</li>
+                                <li>Remove front value</li>
+                                <li>Display queue</li>
+                                <li>End</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>8. Tree Inorder Traversal</h3>
+                        <div class="algo-steps">
+                            <ol>
+                                <li>Start</li>
+                                <li>Traverse left</li>
+                                <li>Visit root</li>
+                                <li>Traverse right</li>
+                                <li>End</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>9. Tree Preorder Traversal</h3>
+                        <div class="algo-steps">
+                            <ol>
+                                <li>Start</li>
+                                <li>Visit root</li>
+                                <li>Traverse left</li>
+                                <li>Traverse right</li>
+                                <li>End</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>10. Tree Postorder Traversal</h3>
+                        <div class="algo-steps">
+                            <ol>
+                                <li>Start</li>
+                                <li>Traverse left</li>
+                                <li>Traverse right</li>
+                                <li>Visit root</li>
+                                <li>End</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PSEUDOCODE SECTION -->
+        <div id="pseudocode" class="section">
+            <div class="page-header">
+                <h1>Pseudocode</h1>
+                <p>Human-readable descriptions of algorithm logic</p>
+            </div>
+            <div class="card">
+                <div class="algo-grid">
+                    <div class="algo-item">
+                        <h3>1. Add Element to Array</h3>
+                        <div class="pseudo-code">START
+INPUT value
+array.append(value)
+DISPLAY array
+END</div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>2. Delete Element from Array</h3>
+                        <div class="pseudo-code">START
+INPUT value
+REMOVE value from array
+DISPLAY array
+END</div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>3. Stack Push</h3>
+                        <div class="pseudo-code">START
+INPUT value
+stack.push(value)
+DISPLAY stack
+END</div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>4. Stack Pop</h3>
+                        <div class="pseudo-code">START
+IF stack is not empty
+  POP stack
+DISPLAY stack
+END</div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>5. Infix to Postfix Conversion</h3>
+                        <div class="pseudo-code">START
+INPUT infix
+CONVERT infix to postfix
+DISPLAY postfix
+END</div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>6. Queue Enqueue</h3>
+                        <div class="pseudo-code">START
+INPUT value
+queue.enqueue(value)
+DISPLAY queue
+END</div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>7. Queue Dequeue</h3>
+                        <div class="pseudo-code">START
+IF queue is not empty
+  DEQUEUE
+DISPLAY queue
+END</div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>8. Tree Inorder Traversal</h3>
+                        <div class="pseudo-code">START
+INORDER(left)
+PRINT root
+INORDER(right)
+END</div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>9. Tree Preorder Traversal</h3>
+                        <div class="pseudo-code">START
+PRINT root
+PREORDER(left)
+PREORDER(right)
+END</div>
+                    </div>
+
+                    <div class="algo-item">
+                        <h3>10. Tree Postorder Traversal</h3>
+                        <div class="pseudo-code">START
+POSTORDER(left)
+POSTORDER(right)
+PRINT root
+END</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ARRAY SECTION -->
+        <div id="array" class="section">
+            <div class="page-header">
+                <h1>Array Implementation</h1>
+                <p>Dynamic collection of elements with add and delete operations</p>
+            </div>
+            <div class="card">
+                <h2>Array Operations</h2>
+                <div class="code-block">class ArrayDS:
+    def __init__(self):
+        self.array = []
+    
+    def add(self, value):
+        self.array.append(value)
+        return f"Added {value}. Array: {self.array}"
+    
+    def delete(self, value):
+        if value in self.array:
+            self.array.remove(value)
+            return f"Deleted {value}. Array: {self.array}"
+        return f"{value} not found in array"</div>
+                
+                <div class="interactive-section">
+                    <h2>Try It Yourself</h2>
+                    <div class="controls">
+                        <input type="text" id="arrayInput" placeholder="Enter a value (e.g., 42, hello)">
+                        <button class="btn" onclick="addToArray()">Add</button>
+                        <button class="btn" onclick="deleteFromArray()">Delete</button>
+                    </div>
+                    <div id="arrayOutput" class="output">Array: []</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STACK SECTION -->
+        <div id="stack" class="section">
+            <div class="page-header">
+                <h1>Stack Implementation</h1>
+                <p>Last-In-First-Out (LIFO) data structure</p>
+            </div>
+            <div class="card">
+                <h2>Stack Operations</h2>
+                <div class="code-block">class Stack:
+    def __init__(self):
+        self.stack = []
+    
+    def push(self, value):
+        self.stack.append(value)
+        return f"Pushed {value}. Stack: {self.stack}"
+    
+    def pop(self):
+        if self.stack:
+            value = self.stack.pop()
+            return f"Popped {value}. Stack: {self.stack}"
+        return "Stack is empty"</div>
+                
+                <div class="interactive-section">
+                    <h2>Try It Yourself</h2>
+                    <div class="controls">
+                        <input type="text" id="stackInput" placeholder="Enter a value">
+                        <button class="btn" onclick="pushStack()">Push</button>
+                        <button class="btn" onclick="popStack()">Pop</button>
+                    </div>
+                    <div id="stackOutput" class="output">Stack: []</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUEUE SECTION -->
+        <div id="queue" class="section">
+            <div class="page-header">
+                <h1>Queue Implementation</h1>
+                <p>First-In-First-Out (FIFO) data structure</p>
+            </div>
+            <div class="card">
+                <h2>Queue Operations</h2>
+                <div class="code-block">class Queue:
+    def __init__(self):
+        self.queue = []
+    
+    def enqueue(self, value):
+        self.queue.append(value)
+        return f"Enqueued {value}. Queue: {self.queue}"
+    
+    def dequeue(self):
+        if self.queue:
+            value = self.queue.pop(0)
+            return f"Dequeued {value}. Queue: {self.queue}"
+        return "Queue is empty"</div>
+                
+                <div class="interactive-section">
+                    <h2>Try It Yourself</h2>
+                    <div class="controls">
+                        <input type="text" id="queueInput" placeholder="Enter a value">
+                        <button class="btn" onclick="enqueueItem()">Enqueue</button>
+                        <button class="btn" onclick="dequeueItem()">Dequeue</button>
+                    </div>
+                    <div id="queueOutput" class="output">Queue: []</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INFIX TO POSTFIX SECTION -->
+        <div id="infix" class="section">
+            <div class="page-header">
+                <h1>Infix to Postfix Conversion</h1>
+                <p>Convert mathematical expressions using stack-based algorithm</p>
+            </div>
+            <div class="card">
+                <h2>Conversion Algorithm</h2>
+                <div class="code-block">def infix_to_postfix(expression):
+    precedence = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3}
+    stack = []
+    output = []
+    
+    for char in expression:
+        if char.isalnum():
+            output.append(char)
+        elif char == '(':
+            stack.append(char)
+        elif char == ')':
+            while stack and stack[-1] != '(':
+                output.append(stack.pop())
+            stack.pop()
+        else:
+            while (stack and stack[-1] != '(' and
+                   precedence.get(char, 0) <= precedence.get(stack[-1], 0)):
+                output.append(stack.pop())
+            stack.append(char)
+    
+    while stack:
+        output.append(stack.pop())
+    
+    return ''.join(output)</div>
+                
+                <div class="interactive-section">
+                    <h2>Try It Yourself</h2>
+                    <div class="controls">
+                        <input type="text" id="infixInput" placeholder="Enter infix expression (e.g., A+B*C)">
+                        <button class="btn run" onclick="convertInfix()">Convert</button>
+                    </div>
+                    <div id="infixOutput" class="output">Enter an infix expression to convert</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TREE SECTION -->
+        <div id="tree" class="section">
+            <div class="page-header">
+                <h1>Binary Tree Traversal</h1>
+                <p>Inorder, Preorder, and Postorder tree traversal methods</p>
+            </div>
+            <div class="card">
+                <h2>Tree Traversal</h2>
+                <div class="code-block">class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+def inorder(node):
+    if node:
+        inorder(node.left)
+        print(node.value, end=' ')
+        inorder(node.right)
+
+def preorder(node):
+    if node:
+        print(node.value, end=' ')
+        preorder(node.left)
+        preorder(node.right)
+
+def postorder(node):
+    if node:
+        postorder(node.left)
+        postorder(node.right)
+        print(node.value, end=' ')</div>
+                
+                <div class="interactive-section">
+                    <h2>Sample Binary Tree</h2>
+                    <div class="tree-visual">
+                        <pre>
+       50
+      /  \
+    30    70
+   / \   / \
+  20 40 60 80
+                        </pre>
+                    </div>
+                    <div class="controls">
+                        <button class="btn" onclick="traverseTree('inorder')">Inorder</button>
+                        <button class="btn" onclick="traverseTree('preorder')">Preorder</button>
+                        <button class="btn" onclick="traverseTree('postorder')">Postorder</button>
+                    </div>
+                    <div id="treeOutput" class="output">Click a traversal button to see results</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            
+            const buttons = document.querySelectorAll('.nav-links button');
+            buttons.forEach(button => button.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Array Implementation
+        let arrayDS = [];
+
+        function addToArray() {
+            const input = document.getElementById('arrayInput');
+            const value = input.value.trim();
+            if (value) {
+                arrayDS.push(value);
+                document.getElementById('arrayOutput').textContent = `Added "${value}"\nArray: [${arrayDS.join(', ')}]`;
+                input.value = '';
+            }
+        }
+
+        function deleteFromArray() {
+            const input = document.getElementById('arrayInput');
+            const value = input.value.trim();
+            const index = arrayDS.indexOf(value);
+            if (index > -1) {
+                arrayDS.splice(index, 1);
+                document.getElementById('arrayOutput').textContent = `Deleted "${value}"\nArray: [${arrayDS.join(', ')}]`;
+            } else {
+                document.getElementById('arrayOutput').textContent = `"${value}" not found in array\nArray: [${arrayDS.join(', ')}]`;
+            }
+            input.value = '';
+        }
+
+        // Stack Implementation
+        let stackDS = [];
+
+        function pushStack() {
+            const input = document.getElementById('stackInput');
+            const value = input.value.trim();
+            if (value) {
+                stackDS.push(value);
+                document.getElementById('stackOutput').textContent = `Pushed "${value}"\nStack (top→bottom): [${stackDS.slice().reverse().join(', ')}]`;
+                input.value = '';
+            }
+        }
+
+        function popStack() {
+            if (stackDS.length > 0) {
+                const value = stackDS.pop();
+                document.getElementById('stackOutput').textContent = `Popped "${value}"\nStack (top→bottom): [${stackDS.slice().reverse().join(', ')}]`;
+            } else {
+                document.getElementById('stackOutput').textContent = 'Stack is empty!';
+            }
+        }
+
+        // Queue Implementation
+        let queueDS = [];
+
+        function enqueueItem() {
+            const input = document.getElementById('queueInput');
+            const value = input.value.trim();
+            if (value) {
+                queueDS.push(value);
+                document.getElementById('queueOutput').textContent = `Enqueued "${value}"\nQueue (front→back): [${queueDS.join(', ')}]`;
+                input.value = '';
+            }
+        }
+
+        function dequeueItem() {
+            if (queueDS.length > 0) {
+                const value = queueDS.shift();
+                document.getElementById('queueOutput').textContent = `Dequeued "${value}"\nQueue (front→back): [${queueDS.join(', ')}]`;
+            } else {
+                document.getElementById('queueOutput').textContent = 'Queue is empty!';
+            }
+        }
+
+        // Infix to Postfix
+        function infixToPostfix(expression) {
+            const precedence = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3};
+            const stack = [];
+            const output = [];
+            
+            for (let char of expression) {
+                if (/[a-zA-Z0-9]/.test(char)) {
+                    output.push(char);
+                } else if (char === '(') {
+                    stack.push(char);
+                } else if (char === ')') {
+                    while (stack.length && stack[stack.length - 1] !== '(') {
+                        output.push(stack.pop());
+                    }
+                    stack.pop();
+                } else if (precedence[char]) {
+                    while (stack.length && stack[stack.length - 1] !== '(' &&
+                           precedence[char] <= precedence[stack[stack.length - 1]]) {
+                        output.push(stack.pop());
+                    }
+                    stack.push(char);
+                }
+            }
+            
+            while (stack.length) {
+                output.push(stack.pop());
+            }
+            
+            return output.join('');
+        }
+
+        function convertInfix() {
+            const input = document.getElementById('infixInput');
+            const expression = input.value.trim();
+            if (expression) {
+                try {
+                    const postfix = infixToPostfix(expression);
+                    document.getElementById('infixOutput').textContent = `Infix: ${expression}\nPostfix: ${postfix}`;
+                } catch (error) {
+                    document.getElementById('infixOutput').textContent = 'Invalid expression! Use format: A+B*C';
+                }
+            }
+        }
+
+        // Binary Tree
+        class TreeNode {
+            constructor(value) {
+                this.value = value;
+                this.left = null;
+                this.right = null;
+            }
+        }
+
+        // Create sample tree: 50, 30, 70, 20, 40, 60, 80
+        const root = new TreeNode(50);
+        root.left = new TreeNode(30);
+        root.right = new TreeNode(70);
+        root.left.left = new TreeNode(20);
+        root.left.right = new TreeNode(40);
+        root.right.left = new TreeNode(60);
+        root.right.right = new TreeNode(80);
+
+        function inorderTraversal(node, result = []) {
+            if (node) {
+                inorderTraversal(node.left, result);
+                result.push(node.value);
+                inorderTraversal(node.right, result);
+            }
+            return result;
+        }
+
+        function preorderTraversal(node, result = []) {
+            if (node) {
+                result.push(node.value);
+                preorderTraversal(node.left, result);
+                preorderTraversal(node.right, result);
+            }
+            return result;
+        }
+
+        function postorderTraversal(node, result = []) {
+            if (node) {
+                postorderTraversal(node.left, result);
+                postorderTraversal(node.right, result);
+                result.push(node.value);
+            }
+            return result;
+        }
+
+        function traverseTree(type) {
+            let result;
+            if (type === 'inorder') {
+                result = inorderTraversal(root);
+                document.getElementById('treeOutput').textContent = `Inorder (Left→Root→Right):\n${result.join(' → ')}`;
+            } else if (type === 'preorder') {
+                result = preorderTraversal(root);
+                document.getElementById('treeOutput').textContent = `Preorder (Root→Left→Right):\n${result.join(' → ')}`;
+            } else if (type === 'postorder') {
+                result = postorderTraversal(root);
+                document.getElementById('treeOutput').textContent = `Postorder (Left→Right→Root):\n${result.join(' → ')}`;
+            }
+        }
+
+        // Allow Enter key to submit
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('arrayInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') addToArray();
+            });
+            document.getElementById('stackInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') pushStack();
+            });
+            document.getElementById('queueInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') enqueueItem();
+            });
+            document.getElementById('infixInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') convertInfix();
+            });
+        });
+    </script>
+</body>
+</html>
